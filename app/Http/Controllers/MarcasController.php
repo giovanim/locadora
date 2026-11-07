@@ -1,0 +1,206 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Marcas;
+use Illuminate\Http\Request;
+
+class MarcasController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+ protected $marcas;
+
+
+  public function __construct(Marcas $marcas)
+{
+    $this->marcas = $marcas;
+}
+
+
+    public function index()
+    {
+         $marcas = $this->marcas::paginate(3);
+            return response()->json([
+                  'success' => true,
+                   'message' => 'Marcas listadas com sucesso',
+                   'data' => $marcas->items(),
+                   'pagination' => [
+                      'total' => $marcas->total(),
+                      'per_page' => $marcas->perPage(),
+                      'current_page' => $marcas->currentPage(),
+                      'last_page' => $marcas->lastPage(),
+                      'next_page_url' => $marcas->nextPageUrl(),
+                      'prev_page_url' => $marcas->previousPageUrl(),
+                ]
+            ],200);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+         //
+
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+   public function store(Request $request)
+   
+{
+ 
+    try {
+
+        $regras = [
+            'nome' => 'required|string|max:255',
+            'imagem' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048'
+        ];
+
+        $feedback = [
+            'nome.required' => 'O nome da marca é obrigatório.',
+            'nome.string' => 'O nome deve ser um texto.',
+            'nome.max' => 'O nome deve ter no máximo 255 caracteres.',
+
+            'imagem.required' => 'A imagem é obrigatória.',
+            'imagem.image' => 'O arquivo deve ser uma imagem válida.',
+            'imagem.mimes' => 'A imagem deve estar nos formatos JPEG, PNG, JPG ou WEBP.',
+            'imagem.max' => 'A imagem não pode ultrapassar 2 MB.'
+        ];
+
+        $request->validate($regras, $feedback);
+
+        $caminho = $request->file('imagem')->store('marcas', 'public');
+
+        $marca = $this->marcas::create([
+            'nome' => $request->nome,
+            'imagem' => $caminho
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Marca cadastrada com sucesso!',
+            'data' => $marca
+        ], 201);
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+
+        throw $e;
+
+    } catch (\Exception $e) {
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Não foi possível cadastrar a marca.',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+    /**
+     * Display the specified resource.
+     */
+    public function show($id)
+    {
+        //
+
+          $marcas = $this->marcas::find($id);
+
+           if(!$marcas){
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Não foi encontrado.',
+              ], 404);
+           }
+
+             return response()->json([
+                'success' => true,
+                'message' => 'Encontrado com sucesso!.',
+                'data' => [
+
+                'id' => $marcas->id,
+                'nome' => $marcas->nome,
+                'imagem' => $marcas->imagem,
+
+                ]
+
+
+             ],200);     
+   
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Marcas $marcas)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+public function update(Request $request, int $id)
+{
+    // Busca a marca pelo ID
+    $marcas = $this->marcas::find($id);
+
+    // Verifica se a marca existe
+    if (!$marcas) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Marca não encontrada'
+        ], 404);
+    }
+
+    // Validação dos dados
+    $request->validate([
+        'nome' => 'required|string|max:255',
+        'imagem' => 'nullable|string'
+    ]);
+
+    // Atualiza os dados
+    $marcas->update([
+        'nome' => $request->nome,
+        'imagem' => $request->imagem
+    ]);
+
+    // Retorna a resposta
+    return response()->json([
+        'success' => true,
+        'message' => 'Atualizado com sucesso',
+        'data' => [
+            'id' => $marcas->id,
+            'nome' => $marcas->nome,
+            'imagem' => $marcas->imagem
+        ]
+    ], 200);
+}
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy($id)
+    {
+        $marcas = $this->marcas::find($id);
+
+        if (!$marcas) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Marca não encontrada'
+            ], 404);
+        }
+
+        $marcas->delete();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Removido com sucesso'
+        ], 200);
+    }
+
+}
