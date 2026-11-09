@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Marcas;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class MarcasController extends Controller
 {
@@ -132,36 +133,50 @@ class MarcasController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, int $id)
-    {
-        // Busca a marca
-        $marca = $this->marcas::find($id);
+{
+    // Busca a marca
+    $marca = $this->marcas::find($id);
 
-        if (!$marca) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Marca não encontrada'
-            ], 404);
-        }
-
-        // Identifica o método HTTP
-        $method = $request->isMethod('PATCH') ? 'PATCH' : 'PUT';
-
-        // Validação
-        $dados = $request->validate(
-            $marca->rules($id, $method),
-            $marca->feedback()
-        );
-
-        // Atualiza somente os campos validados
-        $marca->update($dados);
-
+    if (!$marca) {
         return response()->json([
-            'success' => true,
-            'message' => 'Marca atualizada com sucesso',
-            'data' => $marca
-        ], 200);
+            'success' => false,
+            'message' => 'Marca não encontrada'
+        ], 404);
     }
 
+    // Identifica o método HTTP
+    $method = $request->isMethod('PATCH') ? 'PATCH' : 'PUT';
+
+    // Validação
+    $dados = $request->validate(
+        $marca->rules($id, $method),
+        $marca->feedback()
+    );
+
+    // Verifica se uma nova imagem foi enviada
+    if ($request->hasFile('imagem')) {
+
+        // Remove a imagem antiga
+        if ($marca->imagem) {
+            Storage::disk('public')->delete($marca->imagem);
+        }
+
+        // Salva a nova imagem
+        $caminho = $request->file('imagem')->store('marcas', 'public');
+
+        // Atualiza o caminho da imagem
+        $dados['imagem'] = $caminho;
+    }
+
+    // Atualiza os dados no banco
+    $marca->update($dados);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Marca atualizada com sucesso',
+        'data' => $marca
+    ], 200);
+}
     /**
      * Remove the specified resource from storage.
      */
