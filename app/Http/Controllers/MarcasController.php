@@ -136,6 +136,9 @@ public function update(Request $request, int $id)
     // Busca a marca pelo ID
     $marcas = $this->marcas::find($id);
 
+    $regra = $this->marcas->rules();
+    $feedback = $this->marcas->feedback();
+
     // Verifica se a marca existe
     if (!$marcas) {
         return response()->json([
@@ -144,17 +147,11 @@ public function update(Request $request, int $id)
         ], 404);
     }
 
-    // Validação dos dados
-    $request->validate([
-        'nome' => 'required|string|max:255',
-        'imagem' => 'nullable|string'
-    ]);
+     // Validação dos dados
+     $request->validate($regra, $feedback);
 
     // Atualiza os dados
-    $marcas->update([
-        'nome' => $request->nome,
-        'imagem' => $request->imagem
-    ]);
+     $marcas->update($request->all());
 
     // Retorna a resposta
     return response()->json([

@@ -20,7 +20,7 @@ class Marcas extends Model
     ];
     public function rules(){
         return [
-            'nome' => 'required|min:3|max:100',
+            'nome' => 'required|unique:marcas,nome/min:3|max:100',
             'imagem' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
         ];
     }
