@@ -131,39 +131,36 @@ class MarcasController extends Controller
     /**
      * Update the specified resource in storage.
      */
-public function update(Request $request, int $id)
-{
-    // Busca a marca pelo ID
-    $marcas = $this->marcas::find($id);
+    public function update(Request $request, int $id)
+    {
+        // Busca a marca
+        $marca = $this->marcas::find($id);
 
-    $regra = $this->marcas->rules();
-    $feedback = $this->marcas->feedback();
+        if (!$marca) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Marca não encontrada'
+            ], 404);
+        }
 
-    // Verifica se a marca existe
-    if (!$marcas) {
+        // Identifica o método HTTP
+        $method = $request->isMethod('PATCH') ? 'PATCH' : 'PUT';
+
+        // Validação
+        $dados = $request->validate(
+            $marca->rules($id, $method),
+            $marca->feedback()
+        );
+
+        // Atualiza somente os campos validados
+        $marca->update($dados);
+
         return response()->json([
-            'success' => false,
-            'message' => 'Marca não encontrada'
-        ], 404);
+            'success' => true,
+            'message' => 'Marca atualizada com sucesso',
+            'data' => $marca
+        ], 200);
     }
-
-     // Validação dos dados
-     $request->validate($regra, $feedback);
-
-    // Atualiza os dados
-     $marcas->update($request->all());
-
-    // Retorna a resposta
-    return response()->json([
-        'success' => true,
-        'message' => 'Atualizado com sucesso',
-        'data' => [
-            'id' => $marcas->id,
-            'nome' => $marcas->nome,
-            'imagem' => $marcas->imagem
-        ]
-    ], 200);
-}
 
     /**
      * Remove the specified resource from storage.

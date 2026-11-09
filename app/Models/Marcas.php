@@ -19,15 +19,15 @@ class Marcas extends Model
 
     ];
     public function rules(){
-        return [
-            'nome' => 'required|unique:marcas,nome/min:3|max:100',
+       return [
+            'nome' => 'required|unique:marcas,nome,' . $this->id . '|min:5|max:100',
             'imagem' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
         ];
     }
     public function feedback(){
         return [
             'nome.required' => 'O campo nome é obrigatório',
-            'nome.min' => 'O campo nome deve ter no mínimo 3 caracteres',
+            'nome.min' => 'O campo nome deve ter no mínimo 5 caracteres',
             'nome.max' => 'O campo nome deve ter no máximo 100 caracteres',
             'imagem.required' => 'O campo imagem é obrigatório',
             'imagem.image' => 'O campo imagem deve ser uma imagem',
