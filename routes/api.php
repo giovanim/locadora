@@ -29,10 +29,8 @@ Route::get('marcas/{id}', [MarcasController::class, 'show'])
     ->name('marcas_show');
 
 Route::put('marcas/{id}',[MarcasController::class, 'update'])->name('marcas_update');
-
-
 Route::delete('marcas/{id}', [MarcasController::class, 'destroy'])->name('marcas_delete');
-
+// end marcas 
 
 
 Route::get('modelo',[ModeloController::class, 'index']);

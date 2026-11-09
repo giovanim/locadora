@@ -57,21 +57,8 @@ class MarcasController extends Controller
  
     try {
 
-        $regras = [
-            'nome' => 'required|string|max:255',
-            'imagem' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048'
-        ];
-
-        $feedback = [
-            'nome.required' => 'O nome da marca é obrigatório.',
-            'nome.string' => 'O nome deve ser um texto.',
-            'nome.max' => 'O nome deve ter no máximo 255 caracteres.',
-
-            'imagem.required' => 'A imagem é obrigatória.',
-            'imagem.image' => 'O arquivo deve ser uma imagem válida.',
-            'imagem.mimes' => 'A imagem deve estar nos formatos JPEG, PNG, JPG ou WEBP.',
-            'imagem.max' => 'A imagem não pode ultrapassar 2 MB.'
-        ];
+        $regras = $this->marcas->rules();
+        $feedback = $this->marcas->feedback();
 
         $request->validate($regras, $feedback);
 
